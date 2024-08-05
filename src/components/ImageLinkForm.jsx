@@ -24,11 +24,17 @@ const ImageLinkForm = () => {
       setIsValidImage(false);
     }
   };
-  const handleOnChange = (e) => {
-    dispatch(setImageUrl(e.target.value));
-  };
+
+  useEffect(() => {
+    if (regions === undefined) {      
+      alert('No Face Detected')
+    }
+  }, [regions])
 
   const handleClick = async () => {
+    if (regions === undefined) {      
+      alert('No Face Detected')
+    }
     if (isBase64(imageUrl)) {
       console.log('Base64 valid');
       dispatch(fetchFaceDetection({ base64: imageUrl.replace(/^data:image\/[a-zA-Z]+;base64,/, '') }));
@@ -41,7 +47,21 @@ const ImageLinkForm = () => {
     }
   };
 
-  
+  const handlePaste = e => {
+    const pastedValue = e.clipboardData.getData('text');
+    dispatch(setImageUrl(pastedValue))
+    e.preventDefault(); 
+  }
+
+
+  const handleKeyDown = (e) => {
+    // Prevent typing but allow navigation keys and backspace
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Control', 'Shift', 'Meta'];
+    
+    if (!allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <div>
@@ -50,23 +70,37 @@ const ImageLinkForm = () => {
       </p>
       <div className="center">
         <div className='form center pa4 br3 shadow-5'>
-          <input type="text" className="f4 pa2 w-70 center" onChange={handleOnChange} />
+          <input 
+            type="text" 
+            className="f4 pa2 w-70 center" 
+            value={imageUrl} 
+            onPaste={handlePaste} 
+            placeholder='Paste Image Url'
+            onKeyDown={handleKeyDown}
+          />
+          <button onClick={() => dispatch(setImageUrl(''))} className="w-30 grow f4 ph3 pv2 dib white bg-light-red">Clear</button>
           <button onClick={handleClick} className="w-30 grow f4 ph3 pv2 dib white bg-light-purple">Detect</button>
         </div>
       </div>
       {isValidImage && (
-        <div className="center mt4">
-          <img src={imageUrl} alt="Image preview" className="br3 shadow-5" style={{ width: '500px', height: 'auto' }} />
-        </div>
+        <div className="tc mt4">
+        <div class="image-container" style={{width: '500px'}}>
+        <img src={imageUrl} alt="Image preview" className="image" />
+        {regions && regions.map((region) => (
+          <div
+            key={region.id}
+            className="border"
+            style={{
+              top: `${region.region_info.bounding_box.top_row * 100}%`,
+              left: `${region.region_info.bounding_box.left_col * 100}%`,
+              width: `${(region.region_info.bounding_box.right_col - region.region_info.bounding_box.left_col) * 100}%`,
+              height: `${(region.region_info.bounding_box.bottom_row - region.region_info.bounding_box.top_row) * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+      </div>
       )}
-      {/* {status === 'succeeded' && regions.map((region, index) => (
-        <div key={index}>
-          <p>BBox: {JSON.stringify(region.region_info.bounding_box)}</p>
-          {region.data.concepts.map((concept, i) => (
-            <p key={i}>{concept.name}: {concept.value.toFixed(4)}</p>
-          ))}
-        </div>
-      ))} */}
     </div>
   );
 };
