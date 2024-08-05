@@ -7,13 +7,13 @@ import ParticlesBg from 'particles-bg'
 
 const App = () => {
   return (
-    <>
+    <div style={{ position: 'relative', minHeight: '100vh' }} className='mb4'>
       <Navigation />  
       <Logo />
       <Rank />
       <ImageLinkForm />
-      <ParticlesBg type="circle" bg={true} />
-    </>
+      <ParticlesBg type="circle" bg={true}  />
+    </div>
   )
 }
 
