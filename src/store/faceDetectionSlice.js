@@ -42,7 +42,7 @@ export const fetchFaceDetection = createAsyncThunk(
 const faceDetectionSlice = createSlice({
   name: 'faceDetection',
   initialState: {
-    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaZIo59qk1wUZvWZdA-YJBUNG_I5fkGtz_GQ&s',
+    imageUrl: '',
     regions: [],
     status: 'idle',
     error: null

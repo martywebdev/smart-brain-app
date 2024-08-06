@@ -66,7 +66,8 @@ const ImageLinkForm = () => {
 
   return (
     <>
-      <div className="flex flex-column flex-row-ns items-center bg-light-red pa4 br2-ns ba b--black-10">
+      <h1 class="f1 lh-title tc">Paste Your Image URL</h1>
+      <div className="flex flex-column flex-row-ns items-center bg-light-red pa4 br2-ns ba b--black-10 w-75 center">
         <input
           type="text" 
           className="input-reset ba b--black-20 pa2 mb2 db w-100" 
