@@ -6,16 +6,19 @@ export const login = createAsyncThunk(
     async (credentials, { rejectWithValue }) => {
       try {
         const { email, password } = credentials;
-        const response = await fetch(`${apiURL}/users?email=${encodeURIComponent(email)}`);
-        const users = await response.json();
-        const user = users.find(user => user.email === email);
+        const response = await fetch(`${apiURL}/sign-in`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password }) 
+        });
+    
+        const user = await response.json();
         if (!user) {
           return rejectWithValue('User not found.');
         }
 
-        if (user.password !== password) {
-          return rejectWithValue('Invalid password.');
-        }
         return user;
       } catch (error) {
         return rejectWithValue(error.message);
@@ -28,27 +31,16 @@ export const register = createAsyncThunk('auth/register',
     try {
       const { email, password, name } = credentials;
 
-      // Validate input
-      if (!email || !password) {
-        return rejectWithValue('Email and password are required.');
-      }
 
-      // Check if email already exists
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users?email=${encodeURIComponent(email)}`);
-      const users = await response.json();
-
-      if (users.length > 0) {
-        return rejectWithValue('Email already exists.');
-      }
-
-      // Add new user
-      const newUserResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
+      // Add new users
+      const newUserResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sign-up`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name}),
       });
 
       const newUser = await newUserResponse.json();
+
       return newUser;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -79,7 +71,7 @@ const authSlice = createSlice({
         })
         .addCase(login.rejected, (state, action) => {
           state.status = 'failed';
-          state.error = action.payload; // This will contain the error message passed to rejectWithValue
+          state.error = action.payload; 
         })
         .addCase(register.pending, (state) => {
           state.status = 'loading';
@@ -91,7 +83,7 @@ const authSlice = createSlice({
         })
         .addCase(register.rejected, (state, action) => {
             state.status = 'failed';
-            state.error = action.payload; // This will contain the error message passed to rejectWithValue
+            state.error = action.payload; 
         });
     },
 })
