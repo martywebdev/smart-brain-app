@@ -1,25 +1,59 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+const apiURL =  import.meta.env.VITE_BACKEND_URL;
 
 export const login = createAsyncThunk(
     'auth/login',
-    async (credentials, { dispatch, rejectWithValue}) => {
-        try {
-            if (credentials.email === "martywebdevelopment@gmail.com" && credentials.password === "password") {
-              const user = JSON.parse(localStorage.getItem('user'));
-              if (user) {
-                return user;
-              } else {
-                // In case the user is not found in localStorage
-                return rejectWithValue('User not found in localStorage');
-              }
-            } else {
-              return rejectWithValue('Invalid credentials');
-            }
-          } catch (error) {
-            return rejectWithValue(error.message);
-          }
+    async (credentials, { rejectWithValue }) => {
+      try {
+        const { email, password } = credentials;
+        const response = await fetch(`${apiURL}/users?email=${encodeURIComponent(email)}`);
+        const users = await response.json();
+        const user = users.find(user => user.email === email);
+        if (!user) {
+          return rejectWithValue('User not found.');
+        }
+
+        if (user.password !== password) {
+          return rejectWithValue('Invalid password.');
+        }
+        return user;
+      } catch (error) {
+        return rejectWithValue(error.message);
+      }
+});
+
+export const register = createAsyncThunk('auth/register', 
+
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const { email, password } = credentials;
+
+      // Validate input
+      if (!email || !password) {
+        return rejectWithValue('Email and password are required.');
+      }
+
+      // Check if email already exists
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users?email=${encodeURIComponent(email)}`);
+      const users = await response.json();
+
+      if (users.length > 0) {
+        return rejectWithValue('Email already exists.');
+      }
+
+      // Add new user
+      const newUserResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const newUser = await newUserResponse.json();
+      return newUser;
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
-  );
+})
 
 const authSlice = createSlice({
     name: 'auth',
@@ -46,6 +80,18 @@ const authSlice = createSlice({
         .addCase(login.rejected, (state, action) => {
           state.status = 'failed';
           state.error = action.payload; // This will contain the error message passed to rejectWithValue
+        })
+        .addCase(register.pending, (state) => {
+          state.status = 'loading';
+          state.error = null;
+        })
+        .addCase(register.fulfilled, (state, action) => {
+            state.status = 'succeeded';
+            state.user = action.payload;
+        })
+        .addCase(register.rejected, (state, action) => {
+            state.status = 'failed';
+            state.error = action.payload; // This will contain the error message passed to rejectWithValue
         });
     },
 })

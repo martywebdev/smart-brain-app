@@ -17,15 +17,19 @@ const Navigation = () => {
         <img src={logo} className="dib w2 h2 br-100" alt="Site Name"/>
       </Link>
 
-      {!user ? 
-      <div className="dtc v-mid w-75 tr">
-        <Link className="link dim dark-gray f6 f5-ns dib mr3 mr4-ns" to="/sign-in" title="Store">Sign In </Link>
-        <Link className="link dim dark-gray f6 f5-ns dib" to={'/sign-up'} title="Contact">Sign Up</Link>
-      </div> 
-      : 
+      {user ? 
+
         <div className="dtc v-mid w-75 tr">
-          <button className="link dim dark-gray f6 f5-ns dib" onClick={() => dispatch(signOut())}  title="Contact">Sign Out</button>
+        <button className="link dim dark-gray f6 f5-ns dib" onClick={() => dispatch(signOut())}  title="Contact">Sign Out</button>
         </div>
+        
+        : 
+
+        <div className="dtc v-mid w-75 tr">
+          <Link className="link dim dark-gray f6 f5-ns dib mr3 mr4-ns" to="/sign-in" title="Store">Sign In </Link>
+          <Link className="link dim dark-gray f6 f5-ns dib" to={'/sign-up'} title="Contact">Sign Up</Link>
+        </div>
+        
       }
       
       

@@ -5,6 +5,7 @@ import ErrorPage from "../pages/ErrorPage";
 import SignIn from "../pages/auth/SignIn";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import SignUp from "../pages/auth/SignUp";
 
 export const router = createBrowserRouter([
     {
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/sign-in',
                         element: <SignIn />
+                    },
+                    {
+                        path: '/sign-up',
+                        element: <SignUp />
                     }
                 ]
                 
