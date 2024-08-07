@@ -26,7 +26,7 @@ export const register = createAsyncThunk('auth/register',
 
   async (credentials, { rejectWithValue }) => {
     try {
-      const { email, password } = credentials;
+      const { email, password, name } = credentials;
 
       // Validate input
       if (!email || !password) {
@@ -45,7 +45,7 @@ export const register = createAsyncThunk('auth/register',
       const newUserResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name}),
       });
 
       const newUser = await newUserResponse.json();

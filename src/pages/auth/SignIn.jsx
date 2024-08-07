@@ -8,7 +8,7 @@ const SignIn = () => {
     const dispatch = useDispatch()
     
     const [credentials, setCredentials] = useState({})
-    const {error, status} = useSelector(state => state.auth)
+    const {status} = useSelector(state => state.auth)
 
     const handleChange = e => {
         const {name, value} = e.target
@@ -18,13 +18,14 @@ const SignIn = () => {
     const handleSubmit = (e) => {
         e.preventDefault()
         dispatch(login(credentials))
+        .unwrap()
+        .then((originalPromiseResult) => {
+            console.log(originalPromiseResult)
+          })
+          .catch((rejectedValueOrSerializedError) => {
+            alert(rejectedValueOrSerializedError)
+          })
     }
-
-    useEffect(() => {
-        if (error !== null) {
-            alert(error)
-        }
-    },[error])
 
   return (
 

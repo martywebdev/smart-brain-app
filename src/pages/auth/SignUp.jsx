@@ -6,12 +6,19 @@ import { register } from '../../store/authSlice'
 const SignUp = () => {
 
     const [userInfo, setUserInfo] = useState({})
-    const {error, status} = useSelector(state => state.auth)
+    const {status} = useSelector(state => state.auth)
     const dispatch = useDispatch()
 
     const handleSubmit = (e) => {
         e.preventDefault()
         dispatch(register(userInfo))
+        .unwrap()
+        .then((originalPromiseResult) => {
+            console.log(originalPromiseResult)
+        })
+        .catch((rejectedValueOrSerializedError) => {
+            alert(rejectedValueOrSerializedError)
+        })
     }
 
     const handleChange = e => {
@@ -19,11 +26,6 @@ const SignUp = () => {
         setUserInfo(prev => ({...prev, [name] : value}))
     }
 
-    useEffect(() => {
-        if (error !== null) {
-            alert(error)
-        }
-    },[error])
     
     return (
         <div className='br2 ba dark-gray b--black-70 w-100 w-50-m w-25-l  center'>

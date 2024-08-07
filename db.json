@@ -11,9 +11,10 @@
       "password": "password"
     },
     {
-      "id": "f222",
+      "id": "eaa7",
       "email": "martywebdevelopment@gmail.com",
-      "password": "password"
+      "password": "password",
+      "name": "Marty"
     }
   ]
 }

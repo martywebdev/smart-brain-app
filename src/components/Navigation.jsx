@@ -10,7 +10,6 @@ const Navigation = () => {
   const user = useSelector(state => state.auth.user)
   const dispatch = useDispatch()
 
-  console.log(user)
   return (
     <nav className="dt w-100 border-box pa3 ph5-ns" >
       <Link className="dtc v-mid mid-gray dim w-25" to={'/'} title="Home">
@@ -20,6 +19,9 @@ const Navigation = () => {
       {user ? 
 
         <div className="dtc v-mid w-75 tr">
+          <span className='mh4'>
+            {`Hello ${user.name}`}
+          </span>
         <button className="link dim dark-gray f6 f5-ns dib" onClick={() => dispatch(signOut())}  title="Contact">Sign Out</button>
         </div>
         
