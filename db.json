@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "Sincere@april.biz",
+      "password": "password"
+    },
+    {
+      "id": "2",
+      "email": "Shanna@melissa.tv",
+      "password": "password"
+    },
+    {
+      "id": "eaa7",
+      "email": "martywebdevelopment@gmail.com",
+      "password": "password",
+      "name": "Marty"
+    }
+  ]
+}
