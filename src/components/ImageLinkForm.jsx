@@ -66,7 +66,7 @@ const ImageLinkForm = () => {
 
   return (
     <>
-      <h1 class="f1 lh-title tc">Paste Your Image URL</h1>
+      <h1 className="f1 lh-title tc">Paste Your Image URL</h1>
       <div className="flex flex-column flex-row-ns items-center bg-light-red pa4 br2-ns ba b--black-10 w-75 center">
         <input
           type="text" 
@@ -74,7 +74,8 @@ const ImageLinkForm = () => {
           value={imageUrl} 
           onPaste={handlePaste} 
           placeholder='Paste Image Url'
-          onKeyDown={handleKeyDown}                
+          onKeyDown={handleKeyDown}           
+          onChange={() => ''}     
           />
         <button onClick={() => dispatch(setImageUrl(''))} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-red ml2">Clear</button>
         <button onClick={handleClick} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-blue ml2">Detect</button>

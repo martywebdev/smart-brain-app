@@ -3,7 +3,8 @@ import App from "../App";
 import Root from "./Root";
 import ErrorPage from "../pages/ErrorPage";
 import SignIn from "../pages/auth/SignIn";
-import ImageLinkForm from "../components/ImageLinkForm";
+import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
 
 export const router = createBrowserRouter([
     {
@@ -12,12 +13,23 @@ export const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [
             {
-                index: true,
-                element: <ImageLinkForm />
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        index: true,
+                        element: <App />
+                    },
+                ]
             },
             {
-                path: '/sign-in',
-                element: <SignIn />
+                element: <PublicRoute />,
+                children: [
+                    {
+                        path: '/sign-in',
+                        element: <SignIn />
+                    }
+                ]
+                
             }
         ]
 
