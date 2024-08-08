@@ -1,15 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setImageUrl, fetchFaceDetection } from '../store/faceDetectionSlice'
+import { clearRegions, fetchFaceDetection } from '../store/faceDetectionSlice'
 import { isBase64, isValidImageUrl } from '../helper/validation';
 
+const useImageValidation = (imageUrl, setIsValidImage) => {
+  useEffect(() => {
+    const validateImage = async () => {
+      if (isBase64(imageUrl)) {
+        setIsValidImage(true);
+      } else if (await isValidImageUrl(imageUrl)) {
+        setIsValidImage(true);
+      } else {
+        setIsValidImage(false);
+      }
+    };
+
+    validateImage();
+  }, [imageUrl, setIsValidImage]);
+};
+
+const useRegionsClearance = (imageUrl, dispatch) => {
+  useEffect(() => {
+    if (imageUrl !== '') {
+      dispatch(clearRegions());
+    }
+  }, [imageUrl, dispatch]);
+};
+
+const useFaceDetectionAlert = (regions) => {
+  useEffect(() => {
+    if (regions === undefined) {
+      alert('No Face Detected');
+    }
+  }, [regions]);
+};
+
 const ImageLinkForm = () => {
+
   const dispatch = useDispatch();
-  const imageUrl = useSelector((state) => state.faceDetection.imageUrl);
+  const [imageUrl, setImageUrl] = useState('')
   const regions = useSelector((state) => state.faceDetection.regions);
   const status = useSelector((state) => state.faceDetection.status);
 
   const [isValidImage, setIsValidImage] = useState(false);
+
+  // Custom hooks
+  useImageValidation(imageUrl, setIsValidImage);
+  useRegionsClearance(imageUrl, dispatch);
+  useFaceDetectionAlert(regions);
 
   useEffect(() => {
     validateImage(imageUrl);
@@ -25,22 +63,11 @@ const ImageLinkForm = () => {
     }
   };
 
-  useEffect(() => {
-    if (regions === undefined) {      
-      alert('No Face Detected')
-    }
-  }, [regions])
-
   const handleClick = async (e) => {
     e.preventDefault()
-    if (regions === undefined) {      
-      alert('No Face Detected')
-    }
     if (isBase64(imageUrl)) {
-      console.log('Base64 valid');
       dispatch(fetchFaceDetection({ base64: imageUrl.replace(/^data:image\/[a-zA-Z]+;base64,/, '') }));
     } else if (await isValidImageUrl(imageUrl)) {
-      console.log('Image URL valid');
       dispatch(fetchFaceDetection({ url: imageUrl }));
     } else {
       console.error('Invalid image URL or Base64 data');
@@ -50,18 +77,30 @@ const ImageLinkForm = () => {
 
   const handlePaste = e => {
     const pastedValue = e.clipboardData.getData('text');
-    dispatch(setImageUrl(pastedValue))
+    setImageUrl(pastedValue)
     e.preventDefault(); 
   }
 
+  const handleChange = (e) => {
+    setImageUrl(e.target.value);
+  };
 
   const handleKeyDown = (e) => {
-    // Prevent typing but allow navigation keys and backspace
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Control', 'Shift', 'Meta'];
-    
-    if (!allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-    }
+    const allowedKeys = [
+      'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
+      'Tab', 'Enter', 'Escape', 
+      'Control', 'Shift', 'Meta', 'Alt'
+    ];
+    if (
+      allowedKeys.includes(e.key) ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.shiftKey ||
+      e.altKey
+    ) {
+      return; 
+    }    
+    e.preventDefault();
   };
 
   return (
@@ -75,13 +114,13 @@ const ImageLinkForm = () => {
           onPaste={handlePaste} 
           placeholder='Paste Image Url'
           onKeyDown={handleKeyDown}           
-          onChange={() => ''}     
+          onChange={handleChange}     
           />
-        <button onClick={() => dispatch(setImageUrl(''))} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-red ml2">Clear</button>
+        <button onClick={() => setImageUrl('')} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-red ml2">Clear</button>
         <button onClick={handleClick} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-blue ml2">Detect</button>
       </div>
       {isValidImage && (
-        <div className='mt4 w-40-ns w-100 center image-container'>              
+        <div className='mt4 w-40-ns w-100 center image-container bg-black'>              
           <img src={imageUrl} className="w-100" alt="night sky over water" ></img>
           {regions && regions.map((region) => (
               <div

@@ -19,10 +19,7 @@ export const  isBase64 = (str) => {
   
   export const isValidImageUrl = async (url) => {
     try {
-      // Check if the URL is valid
-      // const response = await fetch(url, { method: 'HEAD' });
-      // const contentType = response.headers.get('Content-Type');
-      // return response.ok && contentType && contentType.startsWith('image/');
+      // todo handle blob
         const img = new Image();
         img.src = url;
         return new Promise((resolve) => {

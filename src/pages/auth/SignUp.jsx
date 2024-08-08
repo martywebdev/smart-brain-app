@@ -9,16 +9,14 @@ const SignUp = () => {
     const {status} = useSelector(state => state.auth)
     const dispatch = useDispatch()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault()
-        dispatch(register(userInfo))
-        .unwrap()
-        .then((originalPromiseResult) => {
-            console.log(originalPromiseResult)
-        })
-        .catch((rejectedValueOrSerializedError) => {
-            alert(rejectedValueOrSerializedError)
-        })
+        try {
+            await dispatch(register(userInfo)).unwrap();
+            console.log('Login successful!');
+        } catch (rejectedValueOrSerializedError) {
+            alert(rejectedValueOrSerializedError);
+        }
     }
 
     const handleChange = e => {
