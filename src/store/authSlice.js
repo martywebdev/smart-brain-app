@@ -2,50 +2,56 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const apiURL =  import.meta.env.VITE_BACKEND_URL;
 
 export const login = createAsyncThunk(
-    'auth/login',
-    async (credentials, { rejectWithValue }) => {
-      try {
-        const { email, password } = credentials;
-        const response = await fetch(`${apiURL}/sign-in`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password }) 
-        });
-    
-        const user = await response.json();
-        if (!user) {
-          return rejectWithValue('User not found.');
-        }
-
-        return user;
-      } catch (error) {
-        return rejectWithValue(error.message);
-      }
-});
-
-export const register = createAsyncThunk('auth/register', 
-
+  'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const { email, password, name } = credentials;
-
-
-      // Add new users
-      const newUserResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/sign-up`, {
+      const { email, password } = credentials;
+      const response = await fetch(`${apiURL}/sign-in`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name}),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
       });
 
-      const newUser = await newUserResponse.json();
-
-      return newUser;
+      const result = await response.json();
+      
+      // Check if response has statusCode of 200
+      if (response.ok && result.statusCode === 200) {
+        return result.data; // Return the user data from the response
+      } else {
+        return rejectWithValue(result.message || 'Login failed');
+      }
     } catch (error) {
       return rejectWithValue(error.message);
     }
-})
+  }
+);
+
+export const register = createAsyncThunk(
+  'auth/register',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const { email, password, name } = credentials;
+      const response = await fetch(`${apiURL}/sign-up`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name })
+      });
+
+      const result = await response.json();
+      
+      // Check if response has statusCode of 201
+      if (response.ok && result.statusCode === 201) {
+        return result.data; // Return the user data from the response
+      } else {
+        return rejectWithValue(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+)
 
 const authSlice = createSlice({
     name: 'auth',
