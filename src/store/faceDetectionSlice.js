@@ -48,10 +48,9 @@ const faceDetectionSlice = createSlice({
     error: null
   },
   reducers: {
-    setImageUrl: (state, action) => {
-      state.imageUrl = action.payload;
-      state.regions = []
-    }
+    clearRegions: (state) => {
+      state.regions = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -69,6 +68,6 @@ const faceDetectionSlice = createSlice({
   }
 });
 
-export const { setImageUrl } = faceDetectionSlice.actions;
+export const { clearRegions  } = faceDetectionSlice.actions;
 
 export default faceDetectionSlice.reducer;
