@@ -1,15 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setImageUrl, fetchFaceDetection } from '../store/faceDetectionSlice'
+import { clearRegions, fetchFaceDetection } from '../store/faceDetectionSlice'
 import { isBase64, isValidImageUrl } from '../helper/validation';
 
+const useImageValidation = (imageUrl, setIsValidImage) => {
+  useEffect(() => {
+    const validateImage = async () => {
+      if (isBase64(imageUrl)) {
+        setIsValidImage(true);
+      } else if (await isValidImageUrl(imageUrl)) {
+        setIsValidImage(true);
+      } else {
+        setIsValidImage(false);
+      }
+    };
+
+    validateImage();
+  }, [imageUrl, setIsValidImage]);
+};
+
+const useRegionsClearance = (imageUrl, dispatch) => {
+  useEffect(() => {
+    if (imageUrl !== '') {
+      dispatch(clearRegions());
+    }
+  }, [imageUrl, dispatch]);
+};
+
+const useFaceDetectionAlert = (regions) => {
+  useEffect(() => {
+    if (regions === undefined) {
+      alert('No Face Detected');
+    }
+  }, [regions]);
+};
+
 const ImageLinkForm = () => {
+
   const dispatch = useDispatch();
-  const imageUrl = useSelector((state) => state.faceDetection.imageUrl);
+  const [imageUrl, setImageUrl] = useState('')
   const regions = useSelector((state) => state.faceDetection.regions);
   const status = useSelector((state) => state.faceDetection.status);
 
   const [isValidImage, setIsValidImage] = useState(false);
+
+  // Custom hooks
+  useImageValidation(imageUrl, setIsValidImage);
+  useRegionsClearance(imageUrl, dispatch);
+  useFaceDetectionAlert(regions);
 
   useEffect(() => {
     validateImage(imageUrl);
@@ -25,21 +63,11 @@ const ImageLinkForm = () => {
     }
   };
 
-  useEffect(() => {
-    if (regions === undefined) {      
-      alert('No Face Detected')
-    }
-  }, [regions])
-
-  const handleClick = async () => {
-    if (regions === undefined) {      
-      alert('No Face Detected')
-    }
+  const handleClick = async (e) => {
+    e.preventDefault()
     if (isBase64(imageUrl)) {
-      console.log('Base64 valid');
       dispatch(fetchFaceDetection({ base64: imageUrl.replace(/^data:image\/[a-zA-Z]+;base64,/, '') }));
     } else if (await isValidImageUrl(imageUrl)) {
-      console.log('Image URL valid');
       dispatch(fetchFaceDetection({ url: imageUrl }));
     } else {
       console.error('Invalid image URL or Base64 data');
@@ -49,59 +77,66 @@ const ImageLinkForm = () => {
 
   const handlePaste = e => {
     const pastedValue = e.clipboardData.getData('text');
-    dispatch(setImageUrl(pastedValue))
+    setImageUrl(pastedValue)
     e.preventDefault(); 
   }
 
+  const handleChange = (e) => {
+    setImageUrl(e.target.value);
+  };
 
   const handleKeyDown = (e) => {
-    // Prevent typing but allow navigation keys and backspace
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Control', 'Shift', 'Meta'];
-    
-    if (!allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-    }
+    const allowedKeys = [
+      'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
+      'Tab', 'Enter', 'Escape', 
+      'Control', 'Shift', 'Meta', 'Alt'
+    ];
+    if (
+      allowedKeys.includes(e.key) ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.shiftKey ||
+      e.altKey
+    ) {
+      return; 
+    }    
+    e.preventDefault();
   };
 
   return (
-    <div>
-      <p className="f3 tc">
-        This Magic Brain will detect faces in your pictures. Give it a try
-      </p>
-      <div className="center">
-        <div className='form center pa4 br3 shadow-5'>
-          <input 
-            type="text" 
-            className="f4 pa2 w-70 center" 
-            value={imageUrl} 
-            onPaste={handlePaste} 
-            placeholder='Paste Image Url'
-            onKeyDown={handleKeyDown}
+    <>
+      <h1 className="f1 lh-title tc">Paste Your Image URL</h1>
+      <div className="flex flex-column flex-row-ns items-center bg-light-red pa4 br2-ns ba b--black-10 w-75 center">
+        <input
+          type="text" 
+          className="input-reset ba b--black-20 pa2 mb2 db w-100" 
+          value={imageUrl} 
+          onPaste={handlePaste} 
+          placeholder='Paste Image Url'
+          onKeyDown={handleKeyDown}           
+          onChange={handleChange}     
           />
-          <button onClick={() => dispatch(setImageUrl(''))} className="w-30 grow f4 ph3 pv2 dib white bg-light-red">Clear</button>
-          <button onClick={handleClick} className="w-30 grow f4 ph3 pv2 dib white bg-light-purple">Detect</button>
-        </div>
+        <button onClick={() => setImageUrl('')} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-red ml2">Clear</button>
+        <button onClick={handleClick} className="f6 link dim br1 ph3 pv2 mb2 dib white bg-dark-blue ml2">Detect</button>
       </div>
       {isValidImage && (
-        <div className="tc mt4">
-        <div class="image-container" style={{width: '500px'}}>
-        <img src={imageUrl} alt="Image preview" className="image" />
-        {regions && regions.map((region) => (
-          <div
-            key={region.id}
-            className="border"
-            style={{
-              top: `${region.region_info.bounding_box.top_row * 100}%`,
-              left: `${region.region_info.bounding_box.left_col * 100}%`,
-              width: `${(region.region_info.bounding_box.right_col - region.region_info.bounding_box.left_col) * 100}%`,
-              height: `${(region.region_info.bounding_box.bottom_row - region.region_info.bounding_box.top_row) * 100}%`,
-            }}
-          />
-        ))}
-      </div>
-      </div>
+        <div className='mt4 w-40-ns w-100 center image-container bg-black'>              
+          <img src={imageUrl} className="w-100" alt="night sky over water" ></img>
+          {regions && regions.map((region) => (
+              <div
+                key={region.id}
+                className="border"
+                style={{
+                  top: `${region.region_info.bounding_box.top_row * 100}%`,
+                  left: `${region.region_info.bounding_box.left_col * 100}%`,
+                  width: `${(region.region_info.bounding_box.right_col - region.region_info.bounding_box.left_col) * 100}%`,
+                  height: `${(region.region_info.bounding_box.bottom_row - region.region_info.bounding_box.top_row) * 100}%`,
+                }}
+              />
+            ))}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
