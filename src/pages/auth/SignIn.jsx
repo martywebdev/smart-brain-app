@@ -19,7 +19,7 @@ const SignIn = () => {
         e.preventDefault()
         try {
             await dispatch(login(credentials)).unwrap();
-            console.log('Login successful!');
+            console.log('Login successful!!!');
         } catch (rejectedValueOrSerializedError) {
             alert(rejectedValueOrSerializedError);
         }
